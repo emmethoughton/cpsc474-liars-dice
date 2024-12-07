@@ -1,20 +1,19 @@
 import random
 
-NUM_DICE = 5
 NUM_FACES = 6
 
-def initial_state():
+def initial_state(player_one_num_dice, player_two_num_dice):
     '''
     Generates the initial state with NUM_DICE random rolls per player
     '''
-    rolls_one = [random.randint(1, NUM_FACES) for _ in range(NUM_DICE)]
-    rolls_two = [random.randint(1, NUM_FACES) for _ in range(NUM_DICE)]
+    rolls_one = [random.randint(1, NUM_FACES) for _ in range(player_one_num_dice)]
+    rolls_two = [random.randint(1, NUM_FACES) for _ in range(player_two_num_dice)]
     counts_one = tuple(rolls_one.count(face) for face in range(1, NUM_FACES + 1))
     counts_two = tuple(rolls_two.count(face) for face in range(1, NUM_FACES + 1))
     return LiarsDiceState(counts_one, counts_two, [], True)
 
 class LiarsDiceState:
-    def __init__(self, player_one_roll, player_two_roll, bid_history, player_one_turn):
+    def __init__(self, player_one_num_dice, player_two_num_dice, player_one_roll, player_two_roll, bid_history, player_one_turn):
         '''
         Initializes the state for a two-player Liar's Dice game.
         
@@ -28,6 +27,7 @@ class LiarsDiceState:
         :param current_turn: An integer which is True if it is player one's turn
         '''
         
+        self.num_dice = (player_one_num_dice, player_two_num_dice)
         self.player_one_roll = player_one_roll
         self.player_two_roll = player_two_roll
         self.bid_history = bid_history
@@ -52,7 +52,6 @@ class LiarsDiceState:
         else:
             return -1 if num_faces >= last_bid[0] else 1
 
-
     def __possible_moves__(self):
         '''
         Finds all possible bids which could be appended to bid_history from a given state
@@ -71,7 +70,7 @@ class LiarsDiceState:
         for face_value in range(last_bid[1] + 1, NUM_FACES + 1):
             possible_moves.append((last_bid[0], face_value))
         # Any bid of a higher quantity is allowed
-        for quantity in range(last_bid[0] + 1, NUM_DICE * 2 + 1):
+        for quantity in range(last_bid[0] + 1, sum(self.num_dice) * 2 + 1):
             for face_value in range(1, NUM_FACES + 1):
                 possible_moves.append((quantity, face_value))
         # If there has been a bid, you can challenge it
@@ -79,7 +78,6 @@ class LiarsDiceState:
             possible_moves.append(None)
             
         return possible_moves
-
 
     def __move__(self, bid):
         '''
@@ -89,7 +87,6 @@ class LiarsDiceState:
         new_history = self.bid_history.copy()
         new_history.append(bid)
         return LiarsDiceState(self.player_one_roll, self.player_two_roll, new_history, not self.player_one_turn)
-
 
     def __str__(self):
         '''
