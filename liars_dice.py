@@ -34,7 +34,7 @@ class LiarsDiceState:
         self.player_one_turn = player_one_turn
 
     def __is_terminal__(self):
-        return self.bid_history[-1] is None
+        return len(self.bid_history) > 0 and self.bid_history[-1] is None
 
     def __score__(self):
         '''
@@ -73,7 +73,7 @@ class LiarsDiceState:
         # Any bid of a higher quantity is allowed
         for quantity in range(last_bid[0] + 1, NUM_DICE * 2 + 1):
             for face_value in range(1, NUM_FACES + 1):
-                possible_moves.append(quantity, face_value)
+                possible_moves.append((quantity, face_value))
         # If there has been a bid, you can challenge it
         if len(self.bid_history) > 0:
             possible_moves.append(None)
