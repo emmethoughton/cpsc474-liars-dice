@@ -97,6 +97,6 @@ class LiarsDiceState:
         '''
         return (f"Player Rolls: {self.player_one_roll}\n"
                 f"Player Rolls: {self.player_two_roll}\n"
-                f"Current Bid: {self.current_bid}\n"
+                f"Bid History: {self.bid_history}\n"
                 f"Current Turn: Player {self.current_turn}")
 
