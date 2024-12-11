@@ -10,7 +10,7 @@ def initial_state(player_one_num_dice, player_two_num_dice):
     rolls_two = [random.randint(1, NUM_FACES) for _ in range(player_two_num_dice)]
     counts_one = tuple(rolls_one.count(face) for face in range(1, NUM_FACES + 1))
     counts_two = tuple(rolls_two.count(face) for face in range(1, NUM_FACES + 1))
-    return LiarsDiceState(counts_one, counts_two, [], True)
+    return LiarsDiceState(player_one_num_dice, player_two_num_dice, counts_one, counts_two, [], True)
 
 class LiarsDiceState:
     def __init__(self, player_one_num_dice, player_two_num_dice, player_one_roll, player_two_roll, bid_history, player_one_turn):
@@ -27,7 +27,8 @@ class LiarsDiceState:
         :param current_turn: An integer which is True if it is player one's turn
         '''
         
-        self.num_dice = (player_one_num_dice, player_two_num_dice)
+        self.player_one_num_dice = player_one_num_dice
+        self.player_two_num_dice = player_two_num_dice
         self.player_one_roll = player_one_roll
         self.player_two_roll = player_two_roll
         self.bid_history = bid_history
@@ -70,8 +71,8 @@ class LiarsDiceState:
         for face_value in range(last_bid[1] + 1, NUM_FACES + 1):
             possible_moves.append((last_bid[0], face_value))
         # Any bid of a higher quantity is allowed
-        for quantity in range(last_bid[0] + 1, sum(self.num_dice) * 2 + 1):
-            for face_value in range(1, NUM_FACES + 1):
+        for quantity in range(last_bid[0] + 1, self.player_one_num_dice + self.player_two_num_dice + 1):
+            for face_value in range(2, NUM_FACES + 1):
                 possible_moves.append((quantity, face_value))
         # If there has been a bid, you can challenge it
         if len(self.bid_history) > 0:
@@ -86,14 +87,14 @@ class LiarsDiceState:
         '''
         new_history = self.bid_history.copy()
         new_history.append(bid)
-        return LiarsDiceState(self.player_one_roll, self.player_two_roll, new_history, not self.player_one_turn)
+        return LiarsDiceState(self.player_one_num_dice, self.player_two_num_dice, self.player_one_roll, self.player_two_roll, new_history, not self.player_one_turn)
 
     def __str__(self):
         '''
         Returns a string representation of the current state for debugging.     
         '''
-        return (f"Player Rolls: {self.player_one_roll}\n"
-                f"Player Rolls: {self.player_two_roll}\n"
+        return (f"Player One Rolls: {self.player_one_roll}\n"
+                f"Player Two Rolls: {self.player_two_roll}\n"
                 f"Bid History: {self.bid_history}\n"
                 f"Player One's Turn? {self.player_one_turn}")
 
