@@ -213,7 +213,7 @@ def initial_info_set(player_one_num_dice, player_two_num_dice, player_one_roll=N
     # Player one is the player to move at the root of the MCTS tree
     return LiarsDiceIS(player_one_num_dice, player_two_num_dice, player_one_roll, bid_history, player_one_turn)
 
-def epsilon_conservative(info_set, determinization, epsilon=EPSILON):
+def epsilon_conservative(roll, moves, epsilon=EPSILON):
     '''
     Heuristic strategy for choosing player two's actions during the tree traversal.
     With probability 1-EPSILON, chooses a random raise compatible with visible dice or challenges if not possible.
@@ -222,7 +222,6 @@ def epsilon_conservative(info_set, determinization, epsilon=EPSILON):
     :param determinization: player two's roll
     :param epsilon: a hyperparameter adjusting the opponent's probability of bluffing
     '''
-    moves = info_set.__possible_moves__()
     r = random.random()
     if r < epsilon:
         if len(moves) == 1:
@@ -231,7 +230,7 @@ def epsilon_conservative(info_set, determinization, epsilon=EPSILON):
     else:
         viable_moves = []
         for move in moves:
-            if (not move is None) and determinization[0] + determinization[move[1] - 1] >= move[0]:
+            if (not move is None) and roll[0] + roll[move[1] - 1] >= move[0]:
                 viable_moves.append(move)
         if len(viable_moves) > 0:
             return random.choice(viable_moves)
@@ -324,7 +323,7 @@ def traverse_through_node(root, node, node_memo, determinization):
         action = bid_prefix[len(root.info_set.bid_history)]
         next_info_set = root.info_set.__successor__(action)
     else:
-        action = epsilon_conservative(root.info_set, determinization)
+        action = epsilon_conservative(determinization, root.info_set.__possible_moves__())
         if action != bid_prefix[len(root.info_set.bid_history)]:
             return
         next_info_set = root.info_set.__successor__(action)
@@ -347,7 +346,7 @@ def traverse(root, node_memo, determinization):
         return reward
     if not root.info_set.player_one_turn:
         # Exploit + explore for player 2 using a heuristic "epsilon-conservative" strategy
-        action = epsilon_conservative(root.info_set, determinization)
+        action = epsilon_conservative(determinization, root.info_set.__possible_moves__())
         next_info_set = root.info_set.__successor__(action)
         if not next_info_set in node_memo:
             node_memo[next_info_set] = ISNode(next_info_set)
