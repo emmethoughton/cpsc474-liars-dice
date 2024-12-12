@@ -15,8 +15,8 @@ def simulate_game(policy_a, policy_b):
     print("Player 1 Rolls:", counts_one)
     print("Player 2 Rolls:", counts_two)
 
-    current_position_a = mcts.initial_info_set(PLAYER_ONE_DICE, PLAYER_TWO_DICE, counts_one, bid_history=[])
-    current_position_b = mcts.initial_info_set(PLAYER_ONE_DICE, PLAYER_TWO_DICE, counts_two, bid_history=[])
+    current_position_a = mcts.initial_info_set(PLAYER_ONE_DICE, PLAYER_TWO_DICE, counts_one, bid_history=[], player_one_turn=True)
+    current_position_b = mcts.initial_info_set(PLAYER_TWO_DICE, PLAYER_ONE_DICE, counts_two, bid_history=[], player_one_turn=False)
     mover_a = True
     while not current_position_a.__is_terminal__():
         if mover_a:
