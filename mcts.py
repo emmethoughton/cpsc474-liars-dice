@@ -58,6 +58,12 @@ class LiarsDiceIS:
         True if the state is terminal (same for every determinization)
         '''
         return len(self.bid_history) > 0 and self.bid_history[-1] is None
+    
+    def __is_chance__(self):
+        '''
+        True if the current state is a chance node
+        '''
+        return self.player_one_roll is None
 
     def __possible_moves__(self):
         '''
