@@ -16,10 +16,6 @@ reasonable raises based on the observable dice and previous bids.
 position_a = liars_dice.initial_info_set(5, 4, (1, 0, 2, 0, 2, 0), [(2, 5)])
 # Estimate the best move for player 1 in position_a for 10 seconds
 print(rule_based_agent.find_heuristic_move(position_a))
-
---- Evaluation in this Repository on the Zoo ---
->$ make
->$ pypy3 evaluate_agents.py
 '''
 
 from math import comb
