@@ -1,4 +1,5 @@
 from math import comb
+import math
 import random
 from liars_dice import NUM_FACES, PLAYER_ONE_DICE, PLAYER_TWO_DICE
 
@@ -152,8 +153,11 @@ def one_up(info_set):
 
 	# find the highest frequency value in our roll, ignoring 1 (since 1s are wild)
 	for value in range(2, len(my_roll) + 1):
-		if my_roll[value - 1] > highest_known_count:
-			highest_known_count = my_roll[value - 1]
+		total_EV = my_roll[value - 1]
+		if value == prev_bid_val:
+			total_EV += math.floor(prev_bid_count / 2) # estimate how many the opponent has
+		if total_EV > highest_known_count:
+			highest_known_count = total_EV
 			highest_known_value = value
 	
 	# makes the smallest count raise possible
