@@ -1,7 +1,8 @@
 from math import comb
 import random
+from liars_dice import NUM_FACES, PLAYER_ONE_DICE, PLAYER_TWO_DICE
 
-def prob_bid_is_good(bid, known_dice):
+def prob_bid_is_good(info_set, bid, known_dice):
 	'''
 	Calculates the probability that a given bid is true given observable dice, independent of bid history
 
@@ -15,7 +16,7 @@ def prob_bid_is_good(bid, known_dice):
 	bid_count = bid[0]
 	bid_value = bid[1]
 	my_dice = known_dice
-	num_opp_dice = 3 #TODO make a function for finding number of opponent dice remaining
+	num_opp_dice = info_set.player_two_num_dice
 
 	# find the remaining number of unknown dice needed for the bid to be valid
 	remaining_dice_needed = bid_count - my_dice[bid_value - 1]
@@ -108,8 +109,8 @@ def find_smallest_bid(bids):
 
     :param bids: the set of bids to search
 	'''
-	smallest_count = 3 + 3 # TODO: how to import these constants
-	smallest_val = 6 # TODO: how to import these constants
+	smallest_count = PLAYER_ONE_DICE + PLAYER_TWO_DICE
+	smallest_val = NUM_FACES
 	smallest_bid = None
 
 	# searches all bids for the smallest
@@ -183,7 +184,7 @@ def find_heuristic_move(info_set):
 		prev_bid = info_set.bid_history[-1]
 		prev_bid_count = prev_bid[0]
 		prev_bid_val = prev_bid[1]
-		prob_last_bid_was_good = prob_bid_is_good(prev_bid, info_set.player_one_roll)
+		prob_last_bid_was_good = prob_bid_is_good(info_set, prev_bid, info_set.player_one_roll)
 
 	# generate tiers of movesets
 	moves = info_set.__possible_moves__()
@@ -224,4 +225,3 @@ def find_heuristic_move(info_set):
 		return largest_true
 	else: # will have to start bluffing or making reasonable assumptions - one_up_bid
 		return one_up_bid
-		# TODO: Extension - use a one-up-bid that takes into account opponent's dice
