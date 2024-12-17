@@ -1,3 +1,27 @@
+'''
+Ruled-based Agent for Liar's Dice
+Author: Nicolas Liu
+As of: December 17, 2024
+
+Final Project for CPSC 474 at Yale University
+Professor James Glenn
+
+=== Description ===
+Below is an implementation of a heuristic agent for the two-player "Liar's Dice" game. The rules are implemented in sections:
+first, a screening to determine whether challenging is optimall; second, a randomization of bluffing; finally, deciding
+reasonable raises based on the observable dice and previous bids.
+
+=== Example Usage ===
+# Position where you have 5 dice showing (1, 3, 3, 5, 5), opponent has 4 dice, and opponent opened bidding with "two 5s"
+position_a = liars_dice.initial_info_set(5, 4, (1, 0, 2, 0, 2, 0), [(2, 5)])
+# Estimate the best move for player 1 in position_a for 10 seconds
+print(rule_based_agent.find_heuristic_move(position_a))
+
+--- Evaluation in this Repository on the Zoo ---
+>$ make
+>$ pypy3 evaluate_agents.py
+'''
+
 from math import comb
 import math
 import random
@@ -196,7 +220,7 @@ def find_heuristic_move(info_set):
 	trues = true_moves(info_set)
 	
 	# trivial boundary conditions for previous bid validity
-	if not prev_bid is None and prob_last_bid_was_good == 0: # if previous bid is trivially or "reasonably" false, then challenge
+	if not prev_bid is None and prob_last_bid_was_good <= alpha: # if previous bid is trivially or "reasonably" false, then challenge
 		return None
 	elif not prev_bid is None and prob_last_bid_was_good == 1: # if previous bid is trivially true, challenge is not an option
 		if None in reasonables:
