@@ -7,18 +7,27 @@ Final Project for CPSC 474 at Yale University
 Professor James Glenn
 
 === Brief Description ===
-Counterfactual regret (CFR) minimization is an effective algorithm for determining the optimal policy 
-for imperfect information games, such as two player Liar's Dice. For this project, we develop a CFR agent 
-for a variant of Liar's Dice that allows for reasonable convergence time. In particular, we are curious
-about the performance of the CFR agent against an MCTS agent (less training time) and a rule-based agent (even less training time).
+Liar's Dice is an imperfect information, turn-based game in which a group of players take turns bidding "increasing" lower bounds 
+for the total number of a particular face value across the dice they roll collectively. No player can see their opponents' dice. 
+If one player deems an opponent's bid sufficiently unreasonable, they may call "Liar!" and the bid is settled. The loser of the 
+challenge loses a dice before going into the next round. For this project, we focus on the heads up version of Liar's dice in which
+ones are wild.
 
-The two baseline agents we develop our three main algorithms for are a random agent and an "epsilon-conservative" agent, which
-is a very simple heuristic. After training, we play the rule-based, MCTS, and CFR agents against each other to measure
-relative performance, taking into account training times and other parameters.
+For this project, we develop a CFR agent, an SO-MCTS agent, and a rule-based agent for a heads up version of Liar's Dice. 
+Counterfactual regret (CFR) minimization is the most rigorous algorithm for determining the optimal policy for imperfect information 
+games such as two-player Liar's Dice, but it requires significant convergence time. In developing these algorithms, we are particularly
+curious about the relative performance of these agents under time pressure.
+
+For evaluating our agents, we also built two baseline agents: a very naive random agent and an "epsilon-conservative" heuristic agent,
+which chooses a bluff with probability epsilon and chooses an arbitrary raise compatible with its own dice with probability (1-epsilon).
+(If there is no such bid, the agent challenges.) This agent was also used in traversing the MCTS tree because it balances exploitation
+and exploration reasonably and provides solid approximations for the probabilities of each determinization when playing against a human
+player. After training, we also play the rule-based, MCTS, and CFR agents against each other to measure relative performance, taking
+into account training times and other parameters.
 
 === Research Question ===
-How does a CFR minimization agent perform compared to an MCTS and rule-based agents in Liar's Dice? What if the
-time constraints are very limited?
+How do CFR and MCTS agents perform against a rule-based agent in Liar's Dice? Under what time constraints do these agents exhibit 
+strategic strength?
 
 === Summary of Results ===
 All 3 agents perform similarly against the random agent (>90% win rate over 100 games) and 
@@ -28,10 +37,13 @@ Against each other, the MCTS agent does notably better against the rule-based ag
 
 The results take roughly 20 minutes to obtain for the MCTS and CFR agents.
 
-=== Evaluation in this Repository on the Zoo ===
+=== How to run this testing script: ===
 >$ make
+>$ ./LiarsDice
+or simply
 >$ pypy3 evaluate_agents.py
 '''
+
 import liars_dice
 from liars_dice import NUM_FACES, PLAYER_ONE_DICE, PLAYER_TWO_DICE
 import mcts
