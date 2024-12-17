@@ -12,15 +12,11 @@ for player two, given information about their rolls is hidden to the observer.
 
 --- Example Usage ---
 # Position where you have 5 dice showing (1, 3, 3, 5, 5), opponent has 4 dice, and opponent opened bidding with "two 5s"
-position_a = mcts.initial_info_set(5, 4, (1, 0, 2, 0, 2, 0), [(2, 5)])
+position_a = liars_dice.initial_info_set(5, 4, (1, 0, 2, 0, 2, 0), [(2, 5)])
 # Run MCTS on a random starting position where both players have 3 dice
-position_b = mcts.initial_info_set(3, 3)
+position_b = liars_dice.initial_info_set(3, 3)
 # Estimate the best move for player 1 in position_a for 10 seconds
 print(mcts.mcts(position_a, 10))
-
---- Evaluation in this Repository on the Zoo ---
->$ make
->$ pypy3 evaluate_agents.py
 '''
 
 import time
