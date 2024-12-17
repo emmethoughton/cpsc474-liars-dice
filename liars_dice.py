@@ -1,3 +1,23 @@
+'''
+Game Implementation of Liar's Dice
+Authors: Emmet Houghton, Nicolas Liu, Tyler Tan
+As of: December 17, 2024
+
+Final Project for CPSC 474 at Yale University
+Professor James Glenn
+
+=== Brief Description ===
+Below is an implementation for two-player Liar's Dice. The number of dice can be varied. The wild 1s variant means
+that a face value of 1 can count for any bid, however no bids of just 1s are allowed. When a bid is challenged,
+all players' dice will be counted and contribute to the bid's validity, rather than just the bidding player's dice.
+Scoring is computed each round: +1 if player 1 wins the challenge, -1 is player 1 loses the challenge and loses a die.
+
+=== How to run this testing script: ===
+>$ make
+>$ ./LiarsDice
+or simply
+>$ pypy3 evaluate_agents.py
+'''
 import random
 
 NUM_FACES = 6
