@@ -1,3 +1,20 @@
+'''
+CFR Agent for Liar's Dice
+Author: Tyler Tan
+As of: December 17, 2024
+
+Final Project for CPSC 474 at Yale University
+Professor James Glenn
+
+=== Description ===
+Below is an implementation of a CFR agent for the two-player "Liar's Dice" game. 
+
+=== Example Usage ===
+# Position where you have 5 dice showing (1, 3, 3, 5, 5), opponent has 4 dice, and opponent opened bidding with "two 5s"
+position_a = liars_dice.initial_info_set(5, 4, (1, 0, 2, 0, 2, 0), [(2, 5)])
+# Estimate the best move for player 1 in position_a for 10 seconds
+print(cfr.get_cfr(position_a))
+'''
 from liars_dice import LiarsDiceIS, initial_info_set
 import liars_dice
 import time
