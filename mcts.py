@@ -1,7 +1,7 @@
 '''
 MCTS Algorithm for Liar's Dice
 Author: Emmet Houghton
-As of: December 11, 2024
+As of: December 17, 2024
 
 Final Project for CPSC 474 at Yale University
 Professor James Glenn
