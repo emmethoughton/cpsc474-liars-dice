@@ -110,5 +110,5 @@ matchup(rule_based, random_policy, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Random,
 matchup(rule_based, epsilon_conservative_heuristic, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Epsilon-Conservative, alternating first mover, 5 dice each:")
 matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Rule-Based Agent, alternating first mover, 5 dice each:")
 matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Rule-Based Agent, Rule-Based is first mover, 5 dice each:")
-matchup(mcts_policy_onesec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based Agent, alternating first mover, 3 and 4 dice respectively:")
-matchup(mcts_policy_onesec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based Agent, alternating first mover, 3 and 2 dice respectively:")
+matchup(mcts_policy_onesec, rule_based, 3, 4, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based Agent, alternating first mover, 3 and 4 dice respectively:")
+matchup(mcts_policy_onesec, rule_based, 3, 2, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based Agent, alternating first mover, 3 and 2 dice respectively:")
