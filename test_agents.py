@@ -97,7 +97,7 @@ def matchup(policy_a, policy_b, a_dice, b_dice, num_simulations, label, alternat
 
 def quick_results():
 	'''
-     A set of quick (~2 minutes) evaluations done on our developed agents.
+     A set of quick (~3 minutes) evaluations done on our developed agents.
      '''
 	# define policies to test
 	mcts_policy_tenthsec = lambda info_set: mcts.mcts(info_set, 0.1)
@@ -142,7 +142,7 @@ def quick_results():
 def complete_results():
 	'''
      A set of complete (~45 minutes) evaluations done on our developed agents. Notable extensions from quick_results() are:
-     increased number of simulated games from 10 to 100 (to decrease variance), increased CFR time limit from 1 to 5 seconds
+     increased number of simulated games from 10 to 100 (to decrease variance), increased CFR time limit from 1 to 10 seconds
      '''
 	# define policies to test
 	mcts_policy_tenthsec = lambda info_set: mcts.mcts(info_set, 0.1)
