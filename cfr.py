@@ -26,6 +26,12 @@ import copy
 
 class CFRNode:
     def __init__(self, info_key, moves):
+        '''
+        Builds a node storing info_map key, possible moves, strategy, and total regret
+        for current player
+        :param info_key: the key for this node in info_map
+        :param moves: all possible moves from last bid
+        '''
         self.info_key = info_key
         self.moves = moves
         self.total_regret = {move: 0 for move in moves}
@@ -33,14 +39,23 @@ class CFRNode:
         self.total_prob = {move: 0 for move in moves}
     
     def get_curr_strat(self, probability):
+        '''
+        Calculate current strategy based off total regret
+        :param probability: the probability that the current player
+        got to this node
+        '''
         total_pos_regret = 0
+        # get toal positive regret
         for move in self.moves:
             self.strategy[move] = max(0, self.total_regret[move])
             total_pos_regret += self.strategy[move]
+        
+        # average over cumulative pos regret
         if total_pos_regret > 0:
             for move in self.moves:
                 self.strategy[move] /= total_pos_regret
                 self.total_prob[move] += probability * self.strategy[move]
+        # uniform distribution
         else:
             for move in self.moves:
                 self.strategy[move] = 1 / len(self.moves)
@@ -48,6 +63,9 @@ class CFRNode:
         return self.strategy
     
     def get_average_strat(self):
+        '''
+        Calculate average strategy based off total probability
+        '''
         average_strat = {move: 0 for move in self.moves}
         total_prob = 0
         for move in self.moves:
@@ -56,6 +74,7 @@ class CFRNode:
             for move in self.moves:
                 average_strat[move] = self.total_prob[move] / total_prob
         else:
+            # uniform
             for move in self.moves:
                 average_strat[move] = 1 / len(self.moves)
         # renormalize
@@ -70,26 +89,44 @@ class CFRNode:
         return average_strat
     
 def generate_dice_outcomes(n):
+    '''
+        Generate the probabilities for all dice rolls
+        :param n: number of dice
+    '''
     # Generate all possible rolls for n dice
     all_rolls = product(range(1, 7), repeat=n)
     
-    # Count frequencies of dice values for each roll
+    # count for dice roll
     outcomes = Counter(tuple(roll.count(i) for i in range(1, 7)) for roll in all_rolls)
     
     # Calculate probabilities for each outcome
-    probabilities = {
-        outcome: (factorial(n) / (factorial(outcome[0]) *
-                                  factorial(outcome[1]) *
-                                  factorial(outcome[2]) *
-                                  factorial(outcome[3]) *
-                                  factorial(outcome[4]) *
-                                  factorial(outcome[5])) * (1/6)**n)
-        for outcome in outcomes
-    }
+    probabilities = {}
+    for outcome in outcomes:
+        probabilities[outcome] = (factorial(n) / (factorial(outcome[0]) *
+                                        factorial(outcome[1]) *
+                                        factorial(outcome[2]) *
+                                        factorial(outcome[3]) *
+                                        factorial(outcome[4]) *
+                                        factorial(outcome[5])) * (1/6)**n)
     
     return probabilities
 
+def get_move_from_strat(strat):
+    '''
+        Returns a bid/challenge based on given probabilities of a strategy
+        :param strat: a dictionary that maps an action to a probability
+    '''
+    moves = list(strat.keys())
+    probs = list(strat.values())
+    return random.choices(moves, weights=probs, k=1)[0]
+
 def get_cfr(info_set, time_limit):
+    '''
+        Returns an action/next move from a given information set
+        based on the Counterfactual Regret Algorithm
+        :param info_set: the information set of a player
+        :param time_limit: the number of seconds to run CFR 
+    '''
     start_time = time.time()
     PLAYER_ONE_DICE = info_set.player_one_num_dice
     PLAYER_TWO_DICE = info_set.player_two_num_dice
@@ -97,41 +134,55 @@ def get_cfr(info_set, time_limit):
     iterations = 0
     info_map = {}
     while time.time() - start_time < time_limit:
-        iterations += 1
         # initialize other player with no roll
         my_player_info = copy.deepcopy(info_set)
         other_player_info = LiarsDiceIS(PLAYER_TWO_DICE, PLAYER_ONE_DICE, None, my_player_info.bid_history, not my_player_info.player_one_turn)
-        # make current_player (0 index) whosever turn it is
+
+        # array of information sets
         info_sets = [my_player_info, other_player_info]
+
         # run cfr on game tree
         cfr(info_map, info_sets, [1,1,1])
-        print("tree")
 
-    info_key = str(info_set.player_one_roll) + " " + str(info_set.bid_history[-3:])
+        # count iterations
+        iterations += 1
+
+    # key corresponding to given information set
+    info_key = str(info_set.player_one_roll) + " " + str(info_set.bid_history[-1:])
+    # get strategy calculated for that information set
     my_node = info_map[info_key]
     calc_strategy = my_node.get_average_strat()
-    print(f"iterations: {iterations}")
-    for move in my_node.moves:
-        print(f"move: {move}")
-        print(f"prob: {calc_strategy[move]}")
+    
+    # # print probability distribution
+    # print(f"iterations: {iterations}")
+    # for move in my_node.moves:
+    #     print(f"move: {move}")
+    #     print(f"prob: {calc_strategy[move]}")
 
-    moves = list(calc_strategy.keys())
-    probs = list(calc_strategy.values())
-    # return move based on average strategy from all iterations
-    return random.choices(moves, weights=probs, k=1)[0]
+    return get_move_from_strat(calc_strategy)
 
 def cfr(info_map, info_sets, probs):
+    '''
+        Returns the expected utility given the current state
+        in the game tree
+        :param info_map: a dictionary of information sets to CFRNodes
+        :param info_sets: an array of information sets (0 for player, 1 for opponent)
+        :param probs: an array of probabilities [p0, p1, chance]
+    '''
+
+    # check if at a terminal state
     if info_sets[0].__is_terminal__() or info_sets[1].__is_terminal__():
         if info_sets[0].player_one_turn:
             curr_player = 0
         else:
             curr_player = 1
+        
+        # calculate score based off current player
         score = liars_dice.score(info_sets[curr_player].player_one_roll, info_sets[1 - curr_player].player_one_roll, 
                                 info_sets[curr_player].bid_history, info_sets[curr_player].player_one_turn)
-        # print(info_sets[curr_player].bid_history)
-        # print(f"current player: {curr_player}")
-        # print(f"score: {score}")
         return score
+    
+    # chance node
     if info_sets[0].__is_chance__() or info_sets[1].__is_chance__():
         expected_outcome = 0
         if info_sets[0].__is_chance__():
@@ -142,12 +193,12 @@ def cfr(info_map, info_sets, probs):
         # calculate all possible dice rolls for other player
         dice_probs_other = generate_dice_outcomes(info_sets[other_player].player_one_num_dice)
         for outcome_other, prob_other in dice_probs_other.items():
+            # assign dice roll
             info_sets[other_player] = copy.deepcopy(info_sets[other_player])
             info_sets[other_player].player_one_roll = outcome_other
             expected_outcome += prob_other * cfr(info_map, info_sets, 
                 [probs[0], probs[1], probs[2] * prob_other])
         
-        # expected_outcome = cfr(info_map, info_sets, probs)
         return expected_outcome
     
     if info_sets[0].player_one_turn:
@@ -155,13 +206,15 @@ def cfr(info_map, info_sets, probs):
     else:
         curr_player = 1
 
-    info_key = str(info_sets[curr_player].player_one_roll) + " " + str(info_sets[curr_player].bid_history[-3:])
-    moves = info_sets[curr_player].__possible_moves__()
+    # get key for info_map
+    info_key = str(info_sets[curr_player].player_one_roll) + " " + str(info_sets[curr_player].bid_history[-1:])
+    moves = info_sets[curr_player].__possible_moves__(True)
 
+    # create CFRNode if not in map
     if info_key not in info_map:
         info_map[info_key] = CFRNode(info_key, moves)
     curr_strat = info_map[info_key].get_curr_strat(probs[curr_player])
-    # print(curr_strat)
+    
     payoff = 0
     pay = {move:0 for move in moves}
     for move in moves:
@@ -176,7 +229,7 @@ def cfr(info_map, info_sets, probs):
         else:
             pay[move] = -1 * cfr(info_map, [succ_0, succ_1], 
                 [probs[0], probs[1] * curr_strat[move], probs[2]])
-        
+
         # add to total expected payoff
         payoff += curr_strat[move] * pay[move]
 
@@ -187,10 +240,6 @@ def cfr(info_map, info_sets, probs):
     
     return payoff
 
-def cfr_policy(time_limit):
-    def func(info_set):
-        return get_cfr(info_set, time_limit)
-    return func
 
 if __name__ == "__main__":
     sample_info_set = initial_info_set(3, 3, (0, 0, 0, 0, 3, 0), [(5,1)], True)

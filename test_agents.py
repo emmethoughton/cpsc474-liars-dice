@@ -63,6 +63,7 @@ import mcts
 import rule_based_agent
 import cfr
 import random
+import monte_cfr
 
 def simulate_game(policy_a, policy_b, a_dice, b_dice):
     rolls_one = [random.randint(1, NUM_FACES) for _ in range(a_dice)]
@@ -102,9 +103,10 @@ def quick_results():
 	mcts_policy_tenthsec = lambda info_set: mcts.mcts(info_set, 0.1)
 	mcts_policy_onesec = lambda info_set: mcts.mcts(info_set, 1)
 	rule_based = rule_based_agent.find_heuristic_move
-	cfr_policy = cfr.cfr_policy(1)
+	cfr_policy = lambda info_set: cfr.get_cfr(info_set, 1)
 	random_policy = lambda info_set: random.choice(info_set.__possible_moves__())
 	epsilon_conservative_heuristic = lambda info_set: liars_dice.epsilon_conservative(info_set.player_one_roll, info_set.__possible_moves__())
+	monte_cfr_policy = lambda info_set: monte_cfr.get_monte_cfr(info_set, 1)
 
 	print("===== EVALUATION RESULTS =====")
 	print("--- Example Moves from Each Agent: ---")
@@ -113,28 +115,29 @@ def quick_results():
 	print(position_a, "\n")
 	print("MCTS(1 sec) move choice:", mcts_policy_onesec(position_a))
 	print("Rule-Based Agent move choice:", rule_based(position_a))
-	#print("CFR(1 sec) move choice:", cfr_policy(position_a))
 
 	print("Suppose you have 3 dice showing (1, 2, 6), your opponent has 5 dice, and you have the first move:")
 	position_b = liars_dice.initial_info_set(3, 5, (1, 1, 0, 0, 0, 1), [])
 	print(position_b, "\n")
 	print("MCTS(1 sec) move choice:", mcts_policy_onesec(position_b))
 	print("Rule-Based Agent move choice:", rule_based(position_b))
-	#print("CFR(1 sec) move choice:", cfr_policy(position_a))
 
 	print("\n--- Heads Up Win Rates (10-game matchups for illustration): ---")
 	NUM_SIMULATIONS = 10
-	matchup(mcts_policy_tenthsec, random_policy, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Random, alternating first mover, 5 dice each:")
-	matchup(mcts_policy_tenthsec, epsilon_conservative_heuristic, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Epsilon-Conservative, alternating first mover, 5 dice each:")
-	matchup(mcts_policy_tenthsec, mcts_policy_onesec, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. MCTS(1 sec), alternating first mover, 5 dice each:")
-	matchup(rule_based, random_policy, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Random, alternating first mover, 5 dice each:")
-	matchup(rule_based, epsilon_conservative_heuristic, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Epsilon-Conservative, alternating first mover, 5 dice each:")
-	matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Rule-Based, alternating first mover, 5 dice each:")
-	matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "Rule-Based v. MCTS(0.1sec), Rule-Based is first mover, 5 dice each:", alternate=False)
-	matchup(mcts_policy_onesec, rule_based, 3, 4, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based, alternating first mover, 3 and 4 dice respectively:")
-	matchup(mcts_policy_onesec, rule_based, 3, 2, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based, alternating first mover, 3 and 2 dice respectively:")
-	matchup(cfr_policy, random_policy, 1, 1, NUM_SIMULATIONS, "CFR(1 sec) v. Random, alternating first mover, 1 dice each:")
-	matchup(cfr_policy, epsilon_conservative_heuristic, 1, 1, NUM_SIMULATIONS, "CFR(1 sec) v. Epsilon-Conservative, alternating first mover, 1 dice each:")
+	# matchup(mcts_policy_tenthsec, random_policy, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Random, alternating first mover, 5 dice each:")
+	# matchup(mcts_policy_tenthsec, epsilon_conservative_heuristic, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Epsilon-Conservative, alternating first mover, 5 dice each:")
+	# matchup(mcts_policy_tenthsec, mcts_policy_onesec, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. MCTS(1 sec), alternating first mover, 5 dice each:")
+	# matchup(rule_based, random_policy, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Random, alternating first mover, 5 dice each:")
+	# matchup(rule_based, epsilon_conservative_heuristic, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Epsilon-Conservative, alternating first mover, 5 dice each:")
+	# matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Rule-Based, alternating first mover, 5 dice each:")
+	# matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "Rule-Based v. MCTS(0.1sec), Rule-Based is first mover, 5 dice each:", alternate=False)
+	# matchup(mcts_policy_onesec, rule_based, 3, 4, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based, alternating first mover, 3 and 4 dice respectively:")
+	# matchup(mcts_policy_onesec, rule_based, 3, 2, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based, alternating first mover, 3 and 2 dice respectively:")
+	# matchup(cfr_policy, random_policy, 1, 1, NUM_SIMULATIONS, "CFR(1 sec) v. Random, alternating first mover, 1 dice each:")
+	# matchup(cfr_policy, epsilon_conservative_heuristic, 1, 1, NUM_SIMULATIONS, "CFR(1 sec) v. Epsilon-Conservative, alternating first mover, 1 dice each:")
+	matchup(monte_cfr_policy, random_policy, 1, 1, NUM_SIMULATIONS, "MONTE_CFR(1 sec) v. Random, alternating first mover, 1 dice each:")
+	matchup(monte_cfr_policy, epsilon_conservative_heuristic, 1, 1, NUM_SIMULATIONS, "MONTE_CFR(1 sec) v. Epsilon-Conservative, alternating first mover, 1 dice each:")
+	matchup(monte_cfr_policy, mcts_policy_tenthsec, 1, 1, NUM_SIMULATIONS, "MONTE_CFR(1 sec) v. MCTS(0.1sec), alternating first mover, 1 dice each:")
 
 def complete_results():
 	'''
@@ -144,7 +147,8 @@ def complete_results():
 	mcts_policy_tenthsec = lambda info_set: mcts.mcts(info_set, 0.1)
 	mcts_policy_onesec = lambda info_set: mcts.mcts(info_set, 1)
 	rule_based = rule_based_agent.find_heuristic_move
-	cfr_policy = cfr.cfr_policy(5)
+	cfr_policy = lambda info_set: cfr.get_cfr(info_set, 10)
+	monte_cfr_policy = lambda info_set: monte_cfr.get_monte_cfr(info_set, 10)
 	random_policy = lambda info_set: random.choice(info_set.__possible_moves__())
 	epsilon_conservative_heuristic = lambda info_set: liars_dice.epsilon_conservative(info_set.player_one_roll, info_set.__possible_moves__())
 
@@ -163,6 +167,10 @@ def complete_results():
 	matchup(cfr_policy, random_policy, 2, 2, NUM_SIMULATIONS, "CFR(5 sec) v. Random, alternating first mover, 2 dice each:")
 	matchup(cfr_policy, epsilon_conservative_heuristic, 2, 2, NUM_SIMULATIONS, "CFR(5 sec) v. Epsilon-Conservative, alternating first mover, 2 dice each:")
 	matchup(cfr_policy, mcts_policy_tenthsec, 2, 2, NUM_SIMULATIONS, "CFR(5 sec) v. MCTS(0.1 sec)), alternating first mover, 2 dice each:")
+	matchup(monte_cfr_policy, random_policy, 3, 3, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. Random, alternating first mover, 3 dice each:")
+	matchup(monte_cfr_policy, epsilon_conservative_heuristic, 3, 3, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. Epsilon-Conservative, alternating first mover, 3 dice each:")
+	matchup(monte_cfr_policy, rule_based, 3, 3, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. Rule-based, alternating first mover, 3 dice each:")
+	matchup(monte_cfr_policy, mcts_policy_tenthsec, 3, 2, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. MCTS(0.1 sec)), alternating first mover, 3 and 2 dice respectively:")
 
 if __name__ == "__main__":
      quick_results()

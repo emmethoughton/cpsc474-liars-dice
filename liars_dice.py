@@ -59,9 +59,10 @@ class LiarsDiceIS:
         '''
         return self.player_one_roll is None
 
-    def __possible_moves__(self):
+    def __possible_moves__(self, limit=False):
         '''
         Finds all possible bids which could be appended to bid_history from a given state (same for all determinizations)
+        :param limit: True if you only want to moves with same or one higher quantity
         '''
         if self.__is_terminal__():
             return []
@@ -76,8 +77,14 @@ class LiarsDiceIS:
         # Bids of the same quantity but a higher face value are allowed
         for face_value in range(last_bid[1] + 1, NUM_FACES + 1):
             possible_moves.append((last_bid[0], face_value))
-        # Any bid of a higher quantity is allowed
-        for quantity in range(last_bid[0] + 1, self.player_one_num_dice + self.player_two_num_dice + 1):
+
+        if limit:
+            # Can only bid one higher quantity
+            stop = min(last_bid[0] + 2, self.player_one_num_dice + self.player_two_num_dice + 1)
+        else:
+            # Any bid of a higher quantity is allowed
+            stop = self.player_one_num_dice + self.player_two_num_dice + 1
+        for quantity in range(last_bid[0] + 1, stop):
             for face_value in range(2, NUM_FACES + 1):
                 possible_moves.append((quantity, face_value))
         # If there has been a bid, you can challenge it
