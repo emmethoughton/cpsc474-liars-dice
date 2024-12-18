@@ -37,9 +37,12 @@ The MCTS agent finds strong bids for games with at most 10 dice (standard heads 
 meaning that time pressure does not pose a significant challenge for this algorithm in a live game scenario. In fact, the performance
 of the 0.1 second and 1 second MCTS agents are extremely similar (win rate of 1 second agent is not significantly greater than 50%).
 
-The MCTS agent outperforms the Rule-Based Agent (~65% win rate over 100 games) with alternating first mover and 5-dice each. From a
-one-dice disadvantage, the MCTS remains competitive, but the rule-based agent has a strong record with the advantage of the first move
-in an equal-dice game.
+The MCTS agent outperforms the Rule-Based Agent (~65% win rate over 100 games) with alternating first mover and 5-dice each. Even from 
+a one die disadvantage, the MCTS agent remains competitive, but the rule-based agent has a strong record with the advantage of the first
+move in an equal-dice game.
+
+Qualitatively, we note that the MCTS agent plays more aggressively than the rule-based agent, particularly on early bids, suggesting
+human players underestimate the value of making bids with less confidence. Such a phenomenon in observing players new to poker.
 
 === How to run this testing script: ===
 >$ make
@@ -100,6 +103,13 @@ position_a = liars_dice.initial_info_set(5, 4, (1, 0, 2, 0, 2, 0), [(2, 5)])
 print(position_a, "\n")
 print("MCTS(1 sec) move choice:", mcts_policy_onesec(position_a))
 print("Rule-Based Agent move choice:", rule_based(position_a))
+# print("CFR(5 sec) move choice:", cfr_policy(position_a))
+
+print("Suppose you have 3 dice showing (1, 2, 6), your opponent has 5 dice, and you have the first move:")
+position_b = liars_dice.initial_info_set(3, 5, (1, 1, 0, 0, 0, 1), [])
+print(position_b, "\n")
+print("MCTS(1 sec) move choice:", mcts_policy_onesec(position_b))
+print("Rule-Based Agent move choice:", rule_based(position_b))
 # print("CFR(5 sec) move choice:", cfr_policy(position_a))
 
 print("\n--- Heads Up Win Rates (10-game matchups for illustration): ---")
