@@ -11,20 +11,19 @@ Professor James Glenn
 Liar's Dice is an imperfect information, turn-based game in which a group of players take turns bidding "increasing" lower bounds 
 for the total number of a particular face value across the dice they roll collectively. No player can see their opponents' dice. 
 If one player deems an opponent's bid sufficiently unreasonable, they may call "Liar!" and the bid is settled. The loser of the 
-challenge loses a dice before going into the next round. For this project, we focus on the heads up version of Liar's dice in which
+challenge loses a die before going into the next round. For this project, we focus on the heads up version of Liar's dice in which
 ones are wild.
 
 For this project, we develop a CFR agent, an SO-MCTS agent, and a rule-based agent for a heads up version of Liar's Dice. 
 Counterfactual regret (CFR) minimization is the most rigorous algorithm for determining the optimal policy for imperfect information 
 games such as two-player Liar's Dice, but it requires significant convergence time. In developing these algorithms, we are particularly
-curious about the relative performance of these agents under time pressure. (In fact, to reduce convergence time, we also end up 
-developing a Monte Carlo CFR Agent--see results below.)
+curious about the relative performance of these agents under time pressure. 
 
 For evaluating our agents, we use two baseline agents: a very naive random agent and an "epsilon-conservative" heuristic agent,
 which chooses a bluff with probability epsilon and chooses an arbitrary raise compatible with its own dice with probability (1-epsilon).
-(If there is no such bid, the agent challenges.) This agent was also used in traversing the MCTS tree because it balances exploitation
-and exploration reasonably and provides solid approximations for the probability distribution of each determinization when playing 
-against a human player. After training, we also play the rule-based, MCTS, and CFR agents against each other to measure relative 
+(If there is no such bid, the agent challenges.) This agent was also used in traversing the MCTS tree for player 2 because it balances 
+exploitation and exploration reasonably and provides solid approximations for the probability distribution of each determinization when 
+playing against a human player. After training, we also play the rule-based, MCTS, and CFR agents against each other to measure relative 
 performance, taking into account training times and other parameters.
 
 === Research Question ===
@@ -43,7 +42,7 @@ of a second.
 - The CFR agent, on the other hand, takes significant time to converge for games with higher quantities of dice; one complete traversal
 of the game tree takes on the order of 30 minutes for 3 dice per player. We include results for this agent in games where each player 
 has 2 dice below, but this finding led us to develop a stochastic version of the CFR agent which chooses moves following the Monte-Carlo
-Counterfactual Regret Algorithm to traverse the tree. This algorithm exhibits strength in games with 3 dice each.
+Counterfactual Regret Algorithm to traverse the tree.
 
 Results regarding relative performance of agents:
 
@@ -71,7 +70,7 @@ CFR(5 sec) v. Rule-based, alternating first mover, 2 dice each: 0.56
 
 The Monte-Carlo CFR agent tries to remedy the slow convergence time by introducing randomness when selecting the opponent's action
 based off the current strategy. This allows for more iterations of the algorithm within the same time frame and prioritizes paths in the 
-tree that are more likely to occur. The results show that for each of the other agents (random, epsilon-conservative, rule-based),
+tree that are more likely to occur. The results show that for each of the test agents (random, epsilon-conservative, rule-based),
 there was about a 10% increase in win rate. In the future, to improve these results, instead of a time limit, the agent can specify
 the number of iterations to run on the game tree (ex. 10000) to ensure convergence for each information set. This means determining moves
 for opening bids will be quite slow but as the bid history progresses, it will become exponentially faster.
@@ -81,7 +80,7 @@ MONTE_CFR(5 sec) v. Rule-based, alternating first mover, 3 dice each: 0.69
 
 Qualitatively, we note that the MCTS agent plays more aggressively than the rule-based agent, particularly on early bids, suggesting
 human players underestimate the value of making bids with less confidence. Such a phenomenon is common in observing players new to poker. 
-On the other hand, the CFR and MONTE-CFR agent like to take more defensive approaches since they are converging to Nash Equilibrium,
+On the other hand, the CFR and MONTE-CFR agent like to take more defensive approaches since they are converging to a Nash Equilibrium,
 which is achieved by minimizing regret.
 
 === How to run this testing script (quick results, ~2 minutes): ===
@@ -187,7 +186,7 @@ def quick_results():
 
 def complete_results():
 	'''
-     A set of complete (~45 minutes) evaluations done on our developed agents. Notable extensions from quick_results() are:
+     A set of complete (~5 hours) evaluations done on our developed agents. Notable extensions from quick_results() are:
      increased number of simulated games from 10 to 100 (to decrease variance), increased CFR time limit from 1 to 10 seconds
      '''
 	# define policies to test
