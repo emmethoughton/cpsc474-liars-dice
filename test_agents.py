@@ -30,18 +30,21 @@ How do CFR and MCTS agents perform against a rule-based agent in Liar's Dice? Un
 strategic strength?
 
 === Summary of Results ===
-All 3 agents perform similarly against the random agent (>90% win rate over 100 games) and 
-the epsilon-conservative agent (>75% win rate over 100 games).
+All 3 agents are extremely strong against the random agent (>90% win rate over 100 games) and the epsilon-conservative agent (>80% win
+rate over 100 games). 
 
-Against each other, the MCTS agent does notably better against the rule-based agent (65% win rate over 100 games).
+The MCTS agent finds strong bids for games with at most 10 dice (standard heads up games) in less time than any human's reaction time, 
+meaning that time pressure does not pose a significant challenge for this algorithm in a live game scenario.
 
-The results take roughly 20 minutes to obtain for the MCTS and CFR agents.
+The MCTS agent outperforms the Rule-Based Agent (~65% win rate over 100 games) with alternating first mover and 5-dice each, but the 
+rule-based agent wins consistently with the advantage of the first move or with any dice advantage. In fact, the performance of all of
+our algorithms are comparable to the extent that no agent could beat another consistently from a dice disadvantage.
 
 === How to run this testing script: ===
 >$ make
 >$ ./LiarsDice
 or simply
->$ pypy3 evaluate_agents.py
+>$ pypy3 test_agents.py
 '''
 
 import liars_dice
@@ -96,10 +99,16 @@ position_a = liars_dice.initial_info_set(5, 4, (1, 0, 2, 0, 2, 0), [(2, 5)])
 print(position_a, "\n")
 print("MCTS(1 sec) move choice:", mcts_policy_onesec(position_a))
 print("Rule-Based Agent move choice:", rule_based(position_a))
-print("CFR(5 sec) move choice:", cfr_policy(position_a))
+# print("CFR(5 sec) move choice:", cfr_policy(position_a))
 
-print("--- Heads Up Win Rates: ---")
+print("\n--- Heads Up Win Rates (10-game matchups for illustration): ---")
 NUM_SIMULATIONS = 10
 matchup(mcts_policy_tenthsec, random_policy, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Random, alternating first mover, 5 dice each:")
 matchup(mcts_policy_tenthsec, epsilon_conservative_heuristic, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Epsilon-Conservative, alternating first mover, 5 dice each:")
 matchup(mcts_policy_tenthsec, mcts_policy_onesec, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. MCTS(1 sec), alternating first mover, 5 dice each:")
+matchup(rule_based, random_policy, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Random, alternating first mover, 5 dice each:")
+matchup(rule_based, epsilon_conservative_heuristic, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Epsilon-Conservative, alternating first mover, 5 dice each:")
+matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Rule-Based Agent, alternating first mover, 5 dice each:")
+matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Rule-Based Agent, Rule-Based is first mover, 5 dice each:")
+matchup(mcts_policy_onesec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based Agent, alternating first mover, 3 and 4 dice respectively:")
+matchup(mcts_policy_onesec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based Agent, alternating first mover, 3 and 2 dice respectively:")
