@@ -139,7 +139,7 @@ def quick_results():
 def complete_results():
 	'''
      A set of complete (~45 minutes) evaluations done on our developed agents. Notable extensions from quick_results() are:
-     increased to 100 simulated games (to decrease variance), increased CFR time limit from 1 to 5 seconds
+     increased number of simulated games from 10 to 100 (to decrease variance), increased CFR time limit from 1 to 5 seconds
      '''
 	# define policies to test
 	mcts_policy_tenthsec = lambda info_set: mcts.mcts(info_set, 0.1)
