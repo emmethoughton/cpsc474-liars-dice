@@ -34,11 +34,12 @@ All 3 agents are extremely strong against the random agent (>90% win rate over 1
 rate over 100 games). 
 
 The MCTS agent finds strong bids for games with at most 10 dice (standard heads up games) in less time than any human's reaction time, 
-meaning that time pressure does not pose a significant challenge for this algorithm in a live game scenario.
+meaning that time pressure does not pose a significant challenge for this algorithm in a live game scenario. In fact, the performance
+of the 0.1 second and 1 second MCTS agents are extremely similar (win rate of 1 second agent is not significantly greater than 50%).
 
-The MCTS agent outperforms the Rule-Based Agent (~65% win rate over 100 games) with alternating first mover and 5-dice each, but the 
-rule-based agent wins consistently with the advantage of the first move or with any dice advantage. In fact, the performance of all of
-our algorithms are comparable to the extent that no agent could beat another consistently from a dice disadvantage.
+The MCTS agent outperforms the Rule-Based Agent (~65% win rate over 100 games) with alternating first mover and 5-dice each. From a
+one-dice disadvantage, the MCTS remains competitive, but the rule-based agent has a strong record with the advantage of the first move
+in an equal-dice game.
 
 === How to run this testing script: ===
 >$ make
@@ -108,7 +109,7 @@ matchup(mcts_policy_tenthsec, epsilon_conservative_heuristic, 5, 5, NUM_SIMULATI
 matchup(mcts_policy_tenthsec, mcts_policy_onesec, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. MCTS(1 sec), alternating first mover, 5 dice each:")
 matchup(rule_based, random_policy, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Random, alternating first mover, 5 dice each:")
 matchup(rule_based, epsilon_conservative_heuristic, 5, 5, NUM_SIMULATIONS, "Rule-Based v. Epsilon-Conservative, alternating first mover, 5 dice each:")
-matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Rule-Based Agent, alternating first mover, 5 dice each:")
-matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Rule-Based Agent, Rule-Based is first mover, 5 dice each:")
-matchup(mcts_policy_onesec, rule_based, 3, 4, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based Agent, alternating first mover, 3 and 4 dice respectively:")
-matchup(mcts_policy_onesec, rule_based, 3, 2, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based Agent, alternating first mover, 3 and 2 dice respectively:")
+matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Rule-Based, alternating first mover, 5 dice each:")
+matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "Rule-Based v. MCTS(0.1sec), Rule-Based is first mover, 5 dice each:", alternate=False)
+matchup(mcts_policy_onesec, rule_based, 3, 4, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based, alternating first mover, 3 and 4 dice respectively:")
+matchup(mcts_policy_onesec, rule_based, 3, 2, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based, alternating first mover, 3 and 2 dice respectively:")
