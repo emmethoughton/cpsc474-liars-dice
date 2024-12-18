@@ -16,7 +16,8 @@ ones are wild.
 
 For this project, we develop a CFR agent, an SO-MCTS agent, and a rule-based agent for a heads up version of Liar's Dice. 
 Counterfactual regret (CFR) minimization is the most rigorous algorithm for determining the optimal policy for imperfect information 
-games such as two-player Liar's Dice, but it requires significant convergence time. In developing these algorithms, we are particularly
+games such as two-player Liar's Dice, but it requires significant convergence time. To speed up CFR, we also developed a
+monte-carlo CFR agent that randomly selects paths at opponent decision and chance nodes. In developing these algorithms, we are particularly
 curious about the relative performance of these agents under time pressure.
 
 For evaluating our agents, we also built two baseline agents: a very naive random agent and an "epsilon-conservative" heuristic agent,
@@ -31,7 +32,7 @@ How do CFR and MCTS agents perform against a rule-based agent in Liar's Dice? Un
 strategic strength?
 
 === Summary of Results ===
-All 3 agents are extremely strong against the random agent (>90% win rate over 100 games) and the epsilon-conservative agent (>80% win
+All 4 agents are extremely strong against the random agent (>90% win rate over 100 games) and the epsilon-conservative agent (>80% win
 rate over 100 games). 
 
 The MCTS agent finds strong bids for games with at most 10 dice (standard heads up games) in less time than any human's reaction time, 
@@ -42,8 +43,30 @@ The MCTS agent outperforms the Rule-Based Agent (~65% win rate over 100 games) w
 a one die disadvantage, the MCTS agent remains competitive, but the rule-based agent has a strong record with the advantage of the first
 move in an equal-dice game.
 
+The CFR agent does quite well against the random agent (~85% win rate over 100 games) but only does slightly better against the epsilon-conservative and rule-based
+agents (~50-60% win rate over 100 games). This is likely due to convergence time as 5 seconds is likely not enough time to get a large amount of iterations of the entire
+game tree, especially if the player has to make the opening bid. Even when restricting possible moves to increasing the quantity by at most 1,
+the runtime for 1 iteration still took quite long.
+
+The Monte-Carlo CFR agent tries to remedy the slow convergence time by introducing randomness when selecting the opponent's action
+based off the current strategy. This allows for more iterations of the algorithm within the same time frame and
+prioritizes paths in the tree that are more likely to occur. The results show that for each of the other agents (random, epsilon-conservative, rule-based),
+there was about a 10% increase in win rate. In the future, to improve these results, instead of a time limit, the agent can specify
+the number of iterations to run on the game tree (ex. 10000) to ensure convergence for each information set. This means determining moves for opening bids will
+be quite slow but as the bid history progresses, it will become exponentially faster.
+
 Qualitatively, we note that the MCTS agent plays more aggressively than the rule-based agent, particularly on early bids, suggesting
 human players underestimate the value of making bids with less confidence. Such a phenomenon in observing players new to poker.
+On the other hand, the CFR and MONTE-CFR agent like to take more defensive approaches since they are converging to Nash Equilibrium,
+which is achieved by minimizing regret.
+
+COMPLETE RESULTS:
+CFR(5 sec) v. Random, alternating first mover, 2 dice each: 0.85
+CFR(5 sec) v. Epsilon-Conservative, alternating first mover, 2 dice each: 0.61
+CFR(5 sec) v. Rule-based, alternating first mover, 2 dice each: 0.56
+MONTE_CFR(5 sec) v. Random, alternating first mover, 3 dice each: 0.96
+MONTE_CFR(5 sec) v. Epsilon-Conservative, alternating first mover, 3 dice each: 0.76
+MONTE_CFR(5 sec) v. Rule-based, alternating first mover, 3 dice each: 0.69
 
 === How to run this testing script (quick results, ~2 minutes): ===
 >$ make
@@ -51,7 +74,7 @@ human players underestimate the value of making bids with less confidence. Such 
 or simply
 >$ pypy3 test_agents.py
 
-=== How to run this testing script (complete results, ~45 minutes): ===
+=== How to run this testing script (complete results, ~45 min): ===
 1. Uncomment #complete_results() in the main function at the bottom of this file
 2. Comment out quick_results() in the main function to avoid duplicate results
 3. Run testing script as for the quick results
@@ -122,6 +145,13 @@ def quick_results():
 	print("MCTS(1 sec) move choice:", mcts_policy_onesec(position_b))
 	print("Rule-Based Agent move choice:", rule_based(position_b))
 
+	print("Suppose you have 2 dice showing (3, 4), your opponent has 3 dice, and opponent opened bidding with 'one 6':")
+	position_c = liars_dice.initial_info_set(2, 3, (0, 0, 1, 1, 0, 0), [(1, 6)])
+	print(position_c, "\n")
+	print("MCTS(1 sec) move choice:", mcts_policy_onesec(position_c))
+	print("Rule-Based Agent move choice:", rule_based(position_c))
+	print("MONTE_CFR(1 sec) move choice:", monte_cfr_policy(position_c))
+
 	print("\n--- Heads Up Win Rates (10-game matchups for illustration): ---")
 	NUM_SIMULATIONS = 10
 	matchup(mcts_policy_tenthsec, random_policy, 5, 5, NUM_SIMULATIONS, "MCTS(0.1 sec) v. Random, alternating first mover, 5 dice each:")
@@ -148,8 +178,8 @@ def complete_results():
 	mcts_policy_tenthsec = lambda info_set: mcts.mcts(info_set, 0.1)
 	mcts_policy_onesec = lambda info_set: mcts.mcts(info_set, 1)
 	rule_based = rule_based_agent.find_heuristic_move
-	cfr_policy = lambda info_set: cfr.get_cfr(info_set, 10)
-	monte_cfr_policy = lambda info_set: monte_cfr.get_monte_cfr(info_set, 10)
+	cfr_policy = lambda info_set: cfr.get_cfr(info_set, 5)
+	monte_cfr_policy = lambda info_set: monte_cfr.get_monte_cfr(info_set, 5)
 	random_policy = lambda info_set: random.choice(info_set.__possible_moves__())
 	epsilon_conservative_heuristic = lambda info_set: liars_dice.epsilon_conservative(info_set.player_one_roll, info_set.__possible_moves__())
 
@@ -165,14 +195,13 @@ def complete_results():
 	matchup(mcts_policy_tenthsec, rule_based, 5, 5, NUM_SIMULATIONS, "Rule-Based v. MCTS(0.1sec), Rule-Based is first mover, 5 dice each:", alternate=False)
 	matchup(mcts_policy_onesec, rule_based, 3, 4, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based, alternating first mover, 3 and 4 dice respectively:")
 	matchup(mcts_policy_onesec, rule_based, 3, 2, NUM_SIMULATIONS, "MCTS(1 sec) v. Rule-Based, alternating first mover, 3 and 2 dice respectively:")
-	matchup(cfr_policy, random_policy, 1, 1, NUM_SIMULATIONS, "CFR(5 sec) v. Random, alternating first mover, 2 dice each:")
-	matchup(cfr_policy, epsilon_conservative_heuristic, 1, 1, NUM_SIMULATIONS, "CFR(5 sec) v. Epsilon-Conservative, alternating first mover, 2 dice each:")
-	matchup(cfr_policy, mcts_policy_tenthsec, 1, 1, NUM_SIMULATIONS, "CFR(5 sec) v. MCTS(0.1 sec)), alternating first mover, 2 dice each:")
-	matchup(monte_cfr_policy, random_policy, 2, 2, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. Random, alternating first mover, 3 dice each:")
-	matchup(monte_cfr_policy, epsilon_conservative_heuristic, 2, 2, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. Epsilon-Conservative, alternating first mover, 3 dice each:")
-	matchup(monte_cfr_policy, rule_based, 2, 2, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. Rule-based, alternating first mover, 3 dice each:")
-	matchup(monte_cfr_policy, mcts_policy_tenthsec, 2, 2, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. MCTS(0.1 sec)), alternating first mover, 3 and 2 dice respectively:")
+	matchup(cfr_policy, random_policy, 2, 2, NUM_SIMULATIONS, "CFR(5 sec) v. Random, alternating first mover, 2 dice each:")
+	matchup(cfr_policy, epsilon_conservative_heuristic, 2, 2, NUM_SIMULATIONS, "CFR(5 sec) v. Epsilon-Conservative, alternating first mover, 2 dice each:")
+	matchup(cfr_policy, rule_based, 2, 2, NUM_SIMULATIONS, "CFR(5 sec) v. Rule-based, alternating first mover, 2 dice each:")
+	matchup(monte_cfr_policy, random_policy, 3, 3, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. Random, alternating first mover, 3 dice each:")
+	matchup(monte_cfr_policy, epsilon_conservative_heuristic, 3, 3, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. Epsilon-Conservative, alternating first mover, 3 dice each:")
+	matchup(monte_cfr_policy, rule_based, 3, 3, NUM_SIMULATIONS, "MONTE_CFR(5 sec) v. Rule-based, alternating first mover, 3 dice each:")
 
 if __name__ == "__main__":
-     quick_results()
-	 #complete_results()
+    quick_results()
+	# complete_results()
